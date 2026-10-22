@@ -1,0 +1,84 @@
+[package]
+name = "heji-toolbox"
+version = "0.11.2"
+description = "HeJi ToolBox - 合成工具箱"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "heji_toolbox_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+# 与 tauri 2.11.6 配套的官方 tauri-build
+tauri-build = { version = "2.6.3", features = ["codegen"] }
+
+[features]
+# ---------------------------------------------------------------------------
+# lab-child-webview —— 实验记录页的「原生子 webview」通道（P5）
+#
+# 开启方式：cargo build --features lab-child-webview
+#           （或 pnpm tauri build --features lab-child-webview）
+#
+# 为什么默认关闭：
+#   1. 子 webview 依赖 tauri 的 unstable API（Window::add_child），
+#      上游随时可能改；
+#   2. 本机实测：开启 unstable 后编译出的可执行文件在 Windows 上启动即失败
+#      （STATUS_ENTRYPOINT_NOT_FOUND / 0xc0000139），而同一份代码关掉
+#      unstable 就能正常跑 —— 说明 unstable 路径与本机 WebView2 组合不兼容。
+#
+# 不开这个 feature 时：前端自动使用 iframe 通道（P4 已验证可用），
+# 功能完全不受影响，只是少一点渲染集成度。
+# ---------------------------------------------------------------------------
+lab-child-webview = ["tauri/unstable"]
+
+# 默认开启原生子 webview 通道；如需退回纯 iframe：
+#   cargo build --no-default-features
+default = ["lab-child-webview"]
+
+[dependencies]
+# protocol-asset feature：开启 asset 协议（convertFileSrc 加载本地图片必需）。
+# SOP 插图（反应路线图）与实验记录照片都依赖它 —— tauri.conf.json 里
+# notification 插件已于 2026-10-23 摘除：计时器通知改用浏览器 Notification API，
+# Rust 侧与前端都不再引用它（前端 0 处、Rust 0 处调用）。
+# security.assetProtocol.enable=true 时，Cargo.toml 必须同步开启此 feature
+#
+# 版本对齐说明（2026-10-21）：
+#   Tauri CLI 会校验「NPM 包」与「Rust crate」的 major/minor 是否一致，
+#   不一致直接报错终止构建。package.json 里的 JS 包解析结果为：
+#     @tauri-apps/api ^2        -> 2.11.1
+#     @tauri-apps/plugin-fs     -> 2.5.2
+#     @tauri-apps/plugin-dialog -> 2.7.3
+#     @tauri-apps/plugin-opener -> 2.5.5
+#   这些 Rust 插件均要求 tauri >= 2.10，故核心统一锁定 2.11.6。
+tauri = { version = "2.11.6", features = ["protocol-asset"] }
+# tauri 插件：与上面的 JS 包严格同版本（CLI 校验要求）
+tauri-plugin-opener = "=2.5.5"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# base64 编码：SOP 插图读取后转 base64，前端直接内嵌显示（纯 Rust，无 C 依赖）
+base64 = "0.22"
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+#
+# 2026-10-22（P6）调整 release 配置：
+#   lto: true → "thin"   —— 完整 LTO 在本机实测会让链接阶段长时间卡死
+#                             （rustc CPU 占用几乎为 0，疑似并行链接在受限环境里无法推进），
+#                             thin LTO 保留跨 crate 优化但快得多
+#   debug: true → false  —— 发行版不需要调试符号，去掉后体积与编译时间都显著下降
+#   strip 保持 false      —— 开启 strip 后本机 rustc 出现 0xc0000005 访问违例
+#                         （受限环境的既有问题，见 docs/P6-打包发布说明.md）
+#   codegen-units 保持 1（体积优先，编译时间的改善主要来自上面三项）
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = 3
+panic = "abort"
+strip = false
+debug = false

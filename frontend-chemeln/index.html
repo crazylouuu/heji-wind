@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>合迹 ChemELN — 化学电子实验记录本</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=26">
+  <!-- 品牌图标：ico 供 Windows/旧浏览器，png 供现代浏览器与 iOS 主屏 -->
+  <link rel="icon" href="/static/img/logo.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/static/img/logo-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/static/img/logo-192.png">
+</head>
+<body>
+<script>
+  // 嵌入模式：被工具箱的「实验记录」页用 iframe 载入时，地址带 ?embed=1。
+  // 此时隐藏本页自己的顶部栏和左侧栏 —— 否则会出现「工具箱侧栏 + 合迹侧栏」
+  // 两条竖栏并排的局面。
+  // 必须放在 <body> 开头同步执行：放到 DOMContentLoaded 里会先闪一下整页布局。
+  if (new URLSearchParams(location.search).get('embed') === '1') {
+    document.body.classList.add('embed');
+  }
+</script>
+<div class="app" id="app">
+  <!-- 顶部应用栏（深色通栏，对齐黄河化学 / antd Layout Header 风格） -->
+  <header class="app-header">
+    <div class="brand">
+      <img class="brand-logo" src="/static/img/logo.png" alt="合迹 ChemELN">
+      <span class="brand-name">合迹 ChemELN</span>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <input type="text" id="global-search" placeholder="搜索实验 / 物料..." aria-label="全局搜索">
+      </div>
+    </div>
+  </header>
+
+  <div class="body-row">
+    <!-- 左侧白色导航（对齐 antd light Sider） -->
+    <aside class="sidebar">
+      <nav class="nav" id="nav">
+        <div class="nav-section">
+          <div class="nav-section-title">工作台</div>
+          <button class="btn btn-primary nav-new-btn" id="new-exp-btn">+ 新建实验</button>
+          <div class="nav-item" data-view="dashboard">
+            <span class="icon">📊</span><span>仪表盘</span>
+          </div>
+          <div class="nav-item" data-view="experiments">
+            <span class="icon">📝</span><span>实验记录</span>
+            <span class="badge" id="exp-count-badge" style="display:none">0</span>
+          </div>
+          <div class="nav-item" data-view="kanban">
+            <span class="icon">📋</span><span>看板视图</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">化学</div>
+          <div class="nav-item" data-view="compounds">
+            <span class="icon">⚗️</span><span>化合物库</span>
+          </div>
+          <div class="nav-item" data-view="structure-search">
+            <span class="icon">🔍</span><span>结构检索</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">管理</div>
+          <div class="nav-item" data-view="templates">
+            <span class="icon">📑</span><span>模板管理</span>
+          </div>
+          <div class="nav-item" data-view="tags">
+            <span class="icon">🏷️</span><span>标签管理</span>
+          </div>
+          <div class="nav-item" data-view="data">
+            <span class="icon">💾</span><span>导入导出</span>
+          </div>
+          <div class="nav-item" data-view="backup">
+            <span class="icon">🔒</span><span>备份</span>
+          </div>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div>v1.3.0 · 本地存储</div>
+      </div>
+    </aside>
+
+    <!-- Main area -->
+    <div class="main">
+      <div class="topbar">
+        <h2 id="page-title">仪表盘</h2>
+      </div>
+      <div class="content" id="content">
+        <div class="loading"><div class="spinner"></div> 加载中...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toasts"></div>
+
+<!-- Modal container -->
+<div id="modal-root"></div>
+
+<script src="/static/js/format.js?v=1"></script>
+<script src="/static/js/api.js?v=12"></script>
+<script src="/static/js/editor.js?v=6"></script>
+<script src="/static/js/structure.js?v=4"></script>
+<script src="/static/js/reagents.js?v=9"></script>
+<script src="/static/js/app.js?v=25"></script>
+<script src="/static/js/view-experiments.js?v=2"></script>
+<script src="/static/js/view-compounds.js?v=1"></script>
+<script src="/static/js/view-settings.js?v=1"></script>
+</body>
+</html>

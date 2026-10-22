@@ -1,0 +1,75 @@
+name: CI
+
+# 只做「能不能编译、类型对不对」，不打包安装包 ——
+# 完整打包要 8~10 分钟（PyInstaller + NSIS），放 CI 里性价比太低。
+# 打包仍在本地跑 build/build.ps1。
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  # ---------------------------------------------------------------
+  # 前端：类型检查 + 构建
+  # 项目是 Windows 专用（Tauri + WebView2），所以跑在 windows-latest。
+  # ---------------------------------------------------------------
+  frontend:
+    name: 前端类型检查与构建
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      # 用 npm ci 而不是 npm install：严格按 package-lock.json 装，保证可复现
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 类型检查
+        run: npx vue-tsc --noEmit
+
+      - name: 构建
+        run: npm run build
+
+  # ---------------------------------------------------------------
+  # 后端：Python 语法与导入检查
+  # 只查语法错误和明显的 import 问题，不跑需要 RDKit 的完整测试
+  # （RDKit 在 ubuntu 上要装 ~300MB，且本项目实际只在 Windows 运行）。
+  # ---------------------------------------------------------------
+  python-syntax:
+    name: 后端语法检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: 编译所有 .py（不执行，只查语法）
+        run: python -m compileall -q backend
+
+  # ---------------------------------------------------------------
+  # Rust：cargo check
+  # 首次很慢（要编译整个 Tauri 依赖树），靠 rust-cache 缓 key 之后会快很多。
+  # ---------------------------------------------------------------
+  rust:
+    name: Rust 编译检查
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: cargo check
+        working-directory: src-tauri
+        run: cargo check --message-format short

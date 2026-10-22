@@ -1,0 +1,12 @@
+# ============================================================
+# .cargo/config.toml —— Windows 版构建配置
+#
+# 2026-10-21：HarmonyOS 版已确定不做，故移除原先的
+# aarch64-unknown-linux-ohos 交叉编译段（其中 linker 指向的
+# D:\DaHan\DaHantd\HeJi-ToolBox\ 目录早已不存在）。
+# 现在本文件不含任何绝对路径，clone 到任意目录都能直接构建。
+# ============================================================
+
+[net]
+# 让 cargo 用系统 git 拉取 git 依赖（国内网络环境下更稳）
+git-fetch-with-cli = true

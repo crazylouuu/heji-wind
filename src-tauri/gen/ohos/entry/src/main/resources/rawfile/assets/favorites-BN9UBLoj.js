@@ -1,0 +1,1 @@
+var e=`heji_favorites`;function t(){try{let t=JSON.parse(localStorage.getItem(e)??`[]`);return Array.isArray(t)?t:[]}catch{return[]}}function n(e){return t().includes(e)}function r(n){let r=t(),i=r.indexOf(n);return i>=0?r.splice(i,1):r.push(n),localStorage.setItem(e,JSON.stringify(r)),i<0}export{n,r,t};

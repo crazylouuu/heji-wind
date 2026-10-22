@@ -1,0 +1,93 @@
+# ============================================================
+# ChemLab —— 统一化学实验工作台
+# 整合：合成工具箱（Tauri+Vue）+ 合迹 ChemELN（FastAPI+Rust 无关）+ 黄河数据
+# ============================================================
+
+# --- 前端（Vue/Vite）---
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# --- Rust / Tauri ---
+src-tauri/target/
+src-tauri/gen/schemas/
+src-tauri/gen/android/
+src-tauri/gen/apple/
+# 鸿蒙版不做（2026-10-21 决策）
+src-tauri/gen/ohos/
+# 鸿蒙交叉编译脚本，硬编码 DevEco 路径
+src-tauri/ohos-clang.cmd
+
+# --- 打包产物（P6）---
+# PyInstaller 输出（sidecar）
+build/dist/
+# PyInstaller 中间产物
+build/work/
+# 拷给 Tauri 打包用的 sidecar（构建时生成）
+src-tauri/resources/backend/
+# 后端托管的工具箱前端（由 pnpm build 的 dist 复制而来，构建时生成）
+backend/frontend-toolbox/
+# 验收脚本产出的报告（每次跑都会生成，不入库）
+build/验收报告-*.txt
+# 代码签名私钥（绝不入库）
+*.pfx
+*.p12
+build/ChemLab-CodeSigning.pfx
+
+# --- Python 后端 ---
+# 虚拟环境（requirements.txt 可重建）
+backend/venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# --- 运行数据（全部在 %APPDATA%\ChemLab，不在仓库内）---
+# 源码模式下 backend/data 是开发期数据目录，同样不纳入版本管理
+backend/data/
+*.db
+*.db-wal
+*.db-shm
+# 会话令牌（安全加固生成，勿入库）
+.session_token
+
+# --- 备份与导出产物 ---
+*.zip
+backups/
+!docs/**/*.zip
+
+# --- 本地学习文档（用户自用）---
+xuexi/
+
+# --- 编辑器 ---
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- 日志 ---
+logs/
+*.log
+launch.log
+
+# --- OS ---
+Thumbs.db
+desktop.ini
+
+# PoC 产物（去壳可行性验证用，可随时删）
+build/dist-poc/
+build/work-poc/
+
+# Playwright CLI 的临时快照目录
+.playwright-cli/
+
+# 构建产物临时归档（PyInstaller 清目录被安全策略拦时用于腾位）
+build/_trash/
